@@ -59,7 +59,7 @@ public class Repositories : IClientRepository
             !await CheckSubscriptionPaymentAsync(dto.IdClient, dto.IdSubscription) &&
             await CheckPaymentCorrectness(dto.IdSubscription, amount))
         {
-            var id = _context.Subscriptions.Max(sub => sub.IdSubscription)
+            var id = _context.Subscriptions.Max(sub => sub.IdSubscription);
             await _context.Subscriptions.AddAsync(new Subscription
             {
                 IdSubscription = id,
@@ -70,7 +70,7 @@ public class Repositories : IClientRepository
                 Sales = null
 
             });
-
+            await _context.SaveChangesAsync();
             return id;
         }
 
