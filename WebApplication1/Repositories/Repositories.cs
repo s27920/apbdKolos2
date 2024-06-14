@@ -10,7 +10,7 @@ namespace WebApplication1;
 public interface IClientRepository
 {
     public Task<ClientResponseDto> GetClientByIdAsync(int id);
-    public Task InsertSubscriptionAsync(SubscriptionRequestDto dto, double amount);
+    public Task<int> InsertSubscriptionAsync(SubscriptionRequestDto dto, double amount);
     public Task<bool> CheckIfClientExistsByIdAsync(int id);
     public Task<bool> CheckIfSubscriptionExistsAndIsActiveByIdAsync(int id);
     public Task<bool> CheckSubscriptionPaymentAsync(int clientId, int subscriptionId);
@@ -52,16 +52,17 @@ public class Repositories : IClientRepository
         };
     }
 
-    public async Task InsertSubscriptionAsync(SubscriptionRequestDto dto, double amount)
+    public async Task<int> InsertSubscriptionAsync(SubscriptionRequestDto dto, double amount)
     {
         if (await CheckIfClientExistsByIdAsync(dto.IdClient) &&
             await CheckIfSubscriptionExistsAndIsActiveByIdAsync(dto.IdSubscription) &&
             !await CheckSubscriptionPaymentAsync(dto.IdClient, dto.IdSubscription) &&
             await CheckPaymentCorrectness(dto.IdSubscription, amount))
         {
+            var id = _context.Subscriptions.Max(sub => sub.IdSubscription)
             await _context.Subscriptions.AddAsync(new Subscription
             {
-                IdSubscription = _context.Subscriptions.Max(sub => sub.IdSubscription),
+                IdSubscription = id,
                 EndTime = DateTime.Today,
                 Name = (await _context.Clients.FirstAsync(client => client.IdCient == dto.IdClient)).FirstName,
                 RenewalPeriod = 1,
@@ -69,9 +70,11 @@ public class Repositories : IClientRepository
                 Sales = null
 
             });
-            
 
+            return id;
         }
+
+        return -1;
     }
 
     public async Task<bool> CheckIfClientExistsByIdAsync(int id)
