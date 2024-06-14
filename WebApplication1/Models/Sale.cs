@@ -10,7 +10,7 @@ public class Sale
     [ForeignKey(nameof(IdClient))] public Client Client { get; set; } = null!;
     
     public int IdSubscription { get; set; }
-    [ForeignKey(nameof(IdClient))] public Subscription Subscription { get; set; } = null!;
+    [ForeignKey(nameof(IdSubscription))] public Subscription Subscription { get; set; } = null!;
     
     [Required] public DateTime CreatedAt { get; set; }
 
